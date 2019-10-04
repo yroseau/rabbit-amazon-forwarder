@@ -6,6 +6,7 @@ const (
 	CaCertFile  = "CA_CERT_FILE"
 	CertFile    = "CERT_FILE"
 	KeyFile     = "KEY_FILE"
+	AwsEndpointUrl  = "AWS_ENDPOINT_URL"
 )
 
 // RabbitEntry RabbitMQ mapping entry

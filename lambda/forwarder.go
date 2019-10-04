@@ -1,11 +1,13 @@
 package lambda
 
 import (
+	"os"
 	"errors"
 	"github.com/AirHelp/rabbit-amazon-forwarder/config"
 	"github.com/AirHelp/rabbit-amazon-forwarder/forwarder"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/lambda/lambdaiface"
 	log "github.com/sirupsen/logrus"
@@ -23,13 +25,33 @@ type Forwarder struct {
 	function     string
 }
 
+func getNewSession() *session.Session {
+	awsEndpointUrl := os.Getenv(config.AwsEndpointUrl)
+	if len(awsEndpointUrl) != 0 {
+		customResolver := func(service, region string, optFns ...func(*endpoints.Options)) (endpoints.ResolvedEndpoint, error) {
+			if service == endpoints.S3ServiceID {
+				return endpoints.ResolvedEndpoint{
+					URL: awsEndpointUrl,
+				}, nil
+			}
+		
+			return endpoints.DefaultResolver().EndpointFor(service, region, optFns...)
+		}
+		return session.Must(session.NewSession(&aws.Config{
+			EndpointResolver: endpoints.ResolverFunc(customResolver),
+		}))
+	} else {
+		return session.Must(session.NewSession())
+	}
+}
+
 // CreateForwarder creates instance of forwarder
 func CreateForwarder(entry config.AmazonEntry, lambdaClient ...lambdaiface.LambdaAPI) forwarder.Client {
 	var client lambdaiface.LambdaAPI
 	if len(lambdaClient) > 0 {
 		client = lambdaClient[0]
 	} else {
-		client = lambda.New(session.Must(session.NewSession()))
+		client = lambda.New(getNewSession())
 	}
 	forwarder := Forwarder{entry.Name, client, entry.Target}
 	log.WithField("forwarderName", forwarder.Name()).Info("Created forwarder")

@@ -15,6 +15,7 @@ services:
       CA_CERT_FILE: ${CA_CERT_FILE:- }
       CERT_FILE: ${CERT_FILE:- }
       KEY_FILE: ${KEY_FILE:- }
+      AWS_ENDPOINT_URL: ${AWS_ENDPOINT_URL:- }
   tests:
     build:
       context: .
