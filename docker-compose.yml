@@ -8,6 +8,7 @@ services:
       - "${MAPPING_FILE}:/config/mapping.json"
       - "${CERTS_DIR:-./certs}:/certs"
     environment:
+      # SERVER_PORT: ${SERVER_PORT}
       MAPPING_FILE: /config/mapping.json
       AWS_REGION: ${AWS_REGION}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}

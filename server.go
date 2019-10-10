@@ -10,6 +10,7 @@ import (
 
 const (
 	LogLevel = "LOG_LEVEL"
+	ServerPort = "SERVER_PORT"
 )
 
 func main() {
@@ -26,7 +27,11 @@ func main() {
 	http.HandleFunc("/restart", supervisor.Restart)
 	http.HandleFunc("/health", supervisor.Check)
 	log.Info("Starting http server")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	serverPort := os.Getenv(ServerPort)
+	if len(serverPort) == 0 {
+        serverPort = "8080"
+    }
+	log.Fatal(http.ListenAndServe(":" + serverPort, nil))
 }
 
 func createLogger() {
